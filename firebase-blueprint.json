@@ -1,0 +1,118 @@
+{
+  "entities": {
+    "Ship": {
+      "title": "Ship",
+      "description": "Informasi armada kapal laut JAPARA",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nama kapal" },
+        "code": { "type": "string", "description": "Kode registrasi kapal" },
+        "type": { "type": "string", "description": "Jenis kapal" },
+        "passengerCapacity": { "type": "number", "description": "Kapasitas maksimal penumpang" },
+        "cargoCapacityTons": { "type": "number", "description": "Kapasitas muatan kargo dalam ton" },
+        "route": { "type": "string", "description": "Rute pelayaran utama" },
+        "status": { "type": "string", "description": "Status operasional kapal" },
+        "createdAt": { "type": "string", "description": "Waktu pembuatan data" },
+        "updatedAt": { "type": "string", "description": "Waktu pembaruan data" }
+      },
+      "required": ["name", "code", "type", "passengerCapacity", "cargoCapacityTons", "route", "status"]
+    },
+    "Passenger": {
+      "title": "Passenger",
+      "description": "Data manifes penumpang kapal JAPARA",
+      "type": "object",
+      "properties": {
+        "shipId": { "type": "string", "description": "ID kapal yang dinaiki" },
+        "shipName": { "type": "string", "description": "Nama kapal" },
+        "ticketNumber": { "type": "string", "description": "Nomor tiket unik" },
+        "fullName": { "type": "string", "description": "Nama lengkap penumpang" },
+        "idNumber": { "type": "string", "description": "Nomor identitas NIK/KTP/Paspor" },
+        "gender": { "type": "string", "description": "Jenis kelamin" },
+        "ageCategory": { "type": "string", "description": "Kategori usia penumpang" },
+        "cabinClass": { "type": "string", "description": "Kelas kabin / tiket" },
+        "departurePort": { "type": "string", "description": "Pelabuhan asal" },
+        "destinationPort": { "type": "string", "description": "Pelabuhan tujuan" },
+        "departureDate": { "type": "string", "description": "Tanggal keberangkatan" },
+        "seatNumber": { "type": "string", "description": "Nomor kursi / dek" },
+        "status": { "type": "string", "description": "Status perjalanan tiket" },
+        "notes": { "type": "string", "description": "Catatan khusus penumpang" },
+        "createdBy": { "type": "string", "description": "Email atau user pencatat" },
+        "createdAt": { "type": "string", "description": "Waktu pembuatan data" },
+        "updatedAt": { "type": "string", "description": "Waktu pembaruan data" }
+      },
+      "required": ["shipId", "ticketNumber", "fullName", "idNumber", "gender", "cabinClass", "departurePort", "destinationPort", "departureDate", "status"]
+    },
+    "Cargo": {
+      "title": "Cargo",
+      "description": "Data manifes muatan barang dan kendaraan kapal JAPARA",
+      "type": "object",
+      "properties": {
+        "shipId": { "type": "string", "description": "ID kapal pengangkut" },
+        "shipName": { "type": "string", "description": "Nama kapal" },
+        "manifestNumber": { "type": "string", "description": "Nomor resi/manifes kargo" },
+        "senderName": { "type": "string", "description": "Nama pengirim logistik" },
+        "receiverName": { "type": "string", "description": "Nama penerima muatan" },
+        "cargoType": { "type": "string", "description": "Kategori muatan / jenis kargo" },
+        "weightKg": { "type": "number", "description": "Berat muatan dalam kilogram" },
+        "volumeM3": { "type": "number", "description": "Volume muatan dalam meter kubik" },
+        "unitCount": { "type": "number", "description": "Jumlah koli / unit" },
+        "dangerousGoods": { "type": "boolean", "description": "Status muatan berbahaya (B3)" },
+        "departurePort": { "type": "string", "description": "Pelabuhan asal muat" },
+        "destinationPort": { "type": "string", "description": "Pelabuhan tujuan bongkar" },
+        "status": { "type": "string", "description": "Status pemuatan dan pengiriman" },
+        "notes": { "type": "string", "description": "Keterangan muatan" },
+        "createdBy": { "type": "string", "description": "Email atau user pencatat" },
+        "createdAt": { "type": "string", "description": "Waktu pembuatan data" },
+        "updatedAt": { "type": "string", "description": "Waktu pembaruan data" }
+      },
+      "required": ["shipId", "manifestNumber", "senderName", "receiverName", "cargoType", "weightKg", "departurePort", "destinationPort", "status"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Log aktivitas operasional sistem pelayaran JAPARA",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string", "description": "Tipe aksi CRUD" },
+        "entityType": { "type": "string", "description": "Tipe entitas terkait" },
+        "details": { "type": "string", "description": "Detail keterangan aksi" },
+        "operatorEmail": { "type": "string", "description": "Email operator pelaksana" },
+        "timestamp": { "type": "string", "description": "Waktu aktivitas" }
+      },
+      "required": ["action", "entityType", "details", "operatorEmail", "timestamp"]
+    },
+    "ActiveOperator": {
+      "title": "ActiveOperator",
+      "description": "Operator online aktif secara realtime",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Email operator" },
+        "displayName": { "type": "string", "description": "Nama tampilan operator" },
+        "role": { "type": "string", "description": "Peran operator" },
+        "lastSeen": { "type": "string", "description": "Waktu kehadiran terakhir" }
+      },
+      "required": ["email", "displayName", "role", "lastSeen"]
+    }
+  },
+  "firestore": {
+    "/ships/{shipId}": {
+      "schema": "Ship",
+      "description": "Koleksi data master armada kapal JAPARA"
+    },
+    "/passengers/{passengerId}": {
+      "schema": "Passenger",
+      "description": "Koleksi manifes tiket penumpang kapal JAPARA"
+    },
+    "/cargos/{cargoId}": {
+      "schema": "Cargo",
+      "description": "Koleksi manifes muatan logistik dan kargo kapal JAPARA"
+    },
+    "/activity_logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Audit trail aksi dan operasional pelayaran JAPARA"
+    },
+    "/active_operators/{operatorId}": {
+      "schema": "ActiveOperator",
+      "description": "Kehadiran operator online di sistem realtime"
+    }
+  }
+}

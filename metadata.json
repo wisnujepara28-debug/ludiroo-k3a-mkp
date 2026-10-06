@@ -1,0 +1,6 @@
+{
+  "name": "Nusantara Marine Manifest - Sistem Muatan & Penumpang Kapal",
+  "description": "Aplikasi manajemen manifes pelayaran, muatan kargo, dan penumpang kapal dengan sinkronisasi realtime Firebase Firestore dan otentikasi admin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

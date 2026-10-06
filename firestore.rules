@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'wisnujepara28@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation for Ship documents
+    function isValidShip(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.code is string && data.code.size() > 0 && data.code.size() <= 50 &&
+             data.type is string && data.type.size() <= 50 &&
+             data.passengerCapacity is number && data.passengerCapacity >= 0 &&
+             data.cargoCapacityTons is number && data.cargoCapacityTons >= 0 &&
+             data.route is string && data.route.size() <= 200 &&
+             data.status in ['Bersandar', 'Berlayar', 'Maintenance'];
+    }
+
+    // Validation for Passenger documents
+    function isValidPassenger(data) {
+      return data.shipId is string && data.shipId.size() > 0 &&
+             data.ticketNumber is string && data.ticketNumber.size() > 0 && data.ticketNumber.size() <= 50 &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 100 &&
+             data.idNumber is string && data.idNumber.size() > 0 && data.idNumber.size() <= 50 &&
+             data.gender in ['Laki-laki', 'Perempuan'] &&
+             data.cabinClass in ['VIP', 'Kelas 1', 'Ekonomi'] &&
+             data.departurePort is string && data.departurePort.size() > 0 && data.departurePort.size() <= 100 &&
+             data.destinationPort is string && data.destinationPort.size() > 0 && data.destinationPort.size() <= 100 &&
+             data.status in ['Check-in', 'Boarding', 'Tiba', 'Batal'];
+    }
+
+    // Validation for Cargo documents
+    function isValidCargo(data) {
+      return data.shipId is string && data.shipId.size() > 0 &&
+             data.manifestNumber is string && data.manifestNumber.size() > 0 && data.manifestNumber.size() <= 50 &&
+             data.senderName is string && data.senderName.size() > 0 && data.senderName.size() <= 100 &&
+             data.receiverName is string && data.receiverName.size() > 0 && data.receiverName.size() <= 100 &&
+             data.cargoType is string && data.cargoType.size() <= 100 &&
+             data.weightKg is number && data.weightKg >= 0 &&
+             data.departurePort is string && data.departurePort.size() > 0 && data.departurePort.size() <= 100 &&
+             data.destinationPort is string && data.destinationPort.size() > 0 && data.destinationPort.size() <= 100 &&
+             data.status in ['Terkonfirmasi', 'Dimuat (Loading)', 'Dalam Pelayaran', 'Terkirim', 'Dibatalkan'];
+    }
+
+    // Validation for Activity Logs
+    function isValidActivityLog(data) {
+      return data.action in ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'SYSTEM'] &&
+             data.entityType is string && data.entityType.size() <= 50 &&
+             data.details is string && data.details.size() <= 500 &&
+             data.operatorEmail is string && data.operatorEmail.size() <= 100;
+    }
+
+    // Validation for Active Operators (Real-time presence)
+    function isValidOperator(data) {
+      return data.email is string && data.email.size() <= 100 &&
+             data.displayName is string && data.displayName.size() <= 100 &&
+             data.role is string && data.role.size() <= 50 &&
+             data.lastSeen is string;
+    }
+
+    // Rules for Ships
+    match /ships/{shipId} {
+      allow read: if true;
+      allow create: if isValidId(shipId) && isValidShip(incoming());
+      allow update: if isValidId(shipId) && isValidShip(incoming());
+      allow delete: if isValidId(shipId);
+    }
+
+    // Rules for Passengers
+    match /passengers/{passengerId} {
+      allow read: if true;
+      allow create: if isValidId(passengerId) && isValidPassenger(incoming());
+      allow update: if isValidId(passengerId) && isValidPassenger(incoming());
+      allow delete: if isValidId(passengerId);
+    }
+
+    // Rules for Cargo
+    match /cargos/{cargoId} {
+      allow read: if true;
+      allow create: if isValidId(cargoId) && isValidCargo(incoming());
+      allow update: if isValidId(cargoId) && isValidCargo(incoming());
+      allow delete: if isValidId(cargoId);
+    }
+
+    // Rules for Activity Logs
+    match /activity_logs/{logId} {
+      allow read: if true;
+      allow create: if isValidId(logId) && isValidActivityLog(incoming());
+      allow update: if false; // Logs are immutable
+      allow delete: if isAdmin();
+    }
+
+    // Rules for Active Operators Presence
+    match /active_operators/{operatorId} {
+      allow read: if true;
+      allow create, update: if isValidId(operatorId) && isValidOperator(incoming());
+      allow delete: if isValidId(operatorId);
+    }
+
+    // Test connection document for verifying backend connectivity
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
